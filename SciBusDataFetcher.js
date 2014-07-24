@@ -16,7 +16,7 @@ var logger = new winston.Logger({
 });
 
 var Sequelize = require('sequelize')
-  , sequelize = new Sequelize('SciPark', 'root', '', {
+  , sequelize = new Sequelize('SciPark', 'sci', '', {
       dialect: "mariadb", // or 'sqlite', 'postgres', 'mariadb'
       port:    3306, // or 5432 (for postgres)
     })
@@ -42,7 +42,7 @@ var BusLocation = sequelize.define('BusLocation', {
 	Lng: {type:Sequelize.DECIMAL(9, 6)},
 	Azimuth: {type:Sequelize.INTEGER}
 }, {
-	timestamps: false
+	timestamps: true
 });
 
 var http = require('http'),
