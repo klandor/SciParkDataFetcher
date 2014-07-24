@@ -1,0 +1,13 @@
+{
+  "name": "SciParkShuttleBusFetcher",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Data fetcher",
+  "author": "klandor <klandor@ggmail.com>",
+  "dependencies": {
+    "xml2js": ">=0.4.4",
+    "sequelize": ">=1.7.9",
+    "mariasql": ">=0.1.21",
+    "winston": ">=0.7.3"
+  }
+}
