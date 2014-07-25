@@ -70,7 +70,7 @@ var callback = function(response) {
     parser.parseString(str, function (err, result) {
       if(!!err){
         logger.error('error parsing xml', err);
-        logger.error('with string', {string: str}});
+        logger.error('with string', {string: str});
       }
       else{
         try{
