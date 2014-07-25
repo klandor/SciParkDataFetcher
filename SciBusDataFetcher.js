@@ -69,34 +69,38 @@ var callback = function(response) {
   response.on('end', function () {
     parser.parseString(str, function (err, result) {
       if(!!err){
-
+        logger.error('error parsing xml', err);
       }
       else{
-        result.Buss.bus.map(function(e){return e.$;}).forEach(function(busData){
-          
-          if(previousData[busData.LP] && previousData[busData.LP].Updatetime == busData.Updatetime)
-          {
-            return;
-          }
+        try{
+          result.Buss.bus.map(function(e){return e.$;}).forEach(function(busData){
+            
+            if(previousData[busData.LP] && previousData[busData.LP].Updatetime == busData.Updatetime)
+            {
+              return;
+            }
 
-          previousData[busData.LP] = busData;
+            previousData[busData.LP] = busData;
 
-          logger.info("new data: %j", busData);
+            logger.info("new data: %j", busData);
 
-          var location = BusLocation.build(busData);
-          location
-            .save()
-            .complete(function(err) {
-              if (!!err) {
-                logger.error('The instance has not been saved:', err)
-              } 
-              // else{
-              //   logger.verbose('saved %j', busData);
-              // }
-            });
-        });
-       }
-        
+            var location = BusLocation.build(busData);
+            location
+              .save()
+              .complete(function(err) {
+                if (!!err) {
+                  logger.error('The instance has not been saved:', err);
+                } 
+                // else{
+                //   logger.verbose('saved %j', busData);
+                // }
+              });
+          });
+        }
+        catch(e){
+          logger.error('error parsing xml', e);
+        }
+      }
     });
   });
 };
