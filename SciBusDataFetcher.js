@@ -2,15 +2,19 @@
 var winston = require('winston'),
   fs = require('fs');
 
-if(!fs.existsSync('log'))
+if(!fs.existsSync('/var/log'))
 {
-  fs.mkdirSync('log');
+  fs.mkdirSync('/var/log');
+}
+
+function timestamp(){
+  return new Date()
 }
 
 var logger = new winston.Logger({
   transports:  [
-      new (winston.transports.Console)({ level: 'verbose'}),
-      new (winston.transports.File)({ filename: 'log/fetcher.log', level: 'info' })
+      new (winston.transports.Console)({ level: 'verbose', 'timestamp':true}),
+      new (winston.transports.File)({ filename: '/var/log/fetcher', level: 'info', json: false })
     ],
   exitOnError: false
 });
@@ -19,6 +23,7 @@ var Sequelize = require('sequelize')
   , sequelize = new Sequelize('SciPark', 'sci', '', {
       dialect: "mariadb", // or 'sqlite', 'postgres', 'mariadb'
       port:    3306, // or 5432 (for postgres)
+      logging: false,
     })
 
 sequelize
@@ -58,6 +63,7 @@ var options = {
 var previousData = {};
 
 var callback = function(response) {
+  logger.verbose('response received');
   var str = '';
 
   //another chunk of data has been recieved, so append it to `str`
@@ -67,6 +73,7 @@ var callback = function(response) {
 
   //the whole response has been recieved, so we just print it out here
   response.on('end', function () {
+    logger.verbose('http ended: datalength: ' + str.length);
     parser.parseString(str, function (err, result) {
       if(!!err){
         logger.error('error parsing xml', err);
@@ -93,9 +100,9 @@ var callback = function(response) {
                   logger.error('The instance has not been saved:', err);
                   logger.error('data:', busData);
                 } 
-                // else{
-                //   logger.verbose('saved %j', busData);
-                // }
+                else{
+                  logger.verbose('saved %j', busData);
+                }
               });
           });
         }
@@ -108,8 +115,20 @@ var callback = function(response) {
 };
 
 var fetchBusLocation = function (){
-  http.request(options, callback).end();
-  setTimeout(fetchBusLocation, 5000);
+  var hours = new Date().getHours();
+  if (hours >= 6 && hours < 23) {
+    http.request(options, callback)
+      .on('error', function(e) {
+        logger.error('problem with request: ' + e.message);
+      })
+      .end();
+    logger.verbose('request initiated');
+    setTimeout(fetchBusLocation, 5000);
+  }
+  else {
+    setTimeout(fetchBusLocation, 60000);
+  }
+  
 }
 
 
