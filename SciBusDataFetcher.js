@@ -114,9 +114,16 @@ var callback = function(response) {
   });
 };
 
+var previousHour = -1;
 var fetchBusLocation = function (){
   var hours = new Date().getHours();
   if (hours >= 6 && hours < 23) {
+    if(hours != previousHour){
+      previousHour = hours;
+      http = require('http');
+      logger.info('reinitiaize http lib at ' + hours);
+    }
+
     http.request(options, callback)
       .on('error', function(e) {
         logger.error('problem with request: ' + e.message);
